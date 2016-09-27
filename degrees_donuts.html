@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Slices of the Pie in STEM Fields</title>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+  <style>
+  h2{
+    text-align: center;
+    font-size: 40px;
+  }
+  text.Fields {
+    text-anchor: middle;
+  }
+  div.year_buttons{
+    position : fixed;
+    top : 200px;
+    right: 50px;
+  }
+  div.year_buttons div{
+    padding:10px;
+  }
+  div.degree_buttons {
+    position : fixed;
+    top : 650px;
+    right : 50px;
+  }
+  div.degree_buttons div{
+    padding:10px;
+    border: 0;
+  }
+  .d3-tip {
+    color:white;
+    font-weight: bold;
+    background: black;
+    padding: 12px;
+    border-radius: 2px;
+  }
+  .title {
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+  }
+  .content {
+    font-size: 18px;
+    text-align: center;
+  }
+  </style>
+  
+</head>
+<body>
+<p class="title">Slices of the Pie in the STEM Fields</p>
+<p class="content">Diversity in the Tech Industry has been a main talking point, in regards to how to bring more minority representation into the field.
+There have been many arguments as to why there is such low representation of minorities in which the last one was given by <a href="http://www.usatoday.com/story/tech/news/2016/07/15/facebook-diversity-pipeline-silicon-valley/87142058/">Facebook</a>.  Below I show the change in the major fields that are seeked out by Tech companies.  As you watch the time lapse you can see the increase in Bachelor degree graduates in Computer Science for those minority represented groups.  I invite you to explore the data for other college degrees across other fields. Hover the mouse over the chart to get the absolute number of graduates from a particular ethnicity.  The raw data can be found on the <a href="https://www.nsf.gov/statistics/2015/nsf15311/start.cfm"> NSF Women Minority and Person with Disabilities</a> site.  My Data Wrangling and Exploratory Data Analysis process can be found <a href="https://www.github.com/rmhyman/NSF_STEM_WMPD_DATA">here</a>.
+</p>
+  <script type="text/javascript">
+  
+    function draw(data){
+      var radius = 200,
+      padding = 10;
+
+      var color = d3.scale.ordinal()
+                    .range(["#7fc97f", "#beaed4", "#fdc086", "#ffff99", "#386cb0", "#f0027f"]);
+	
+
+    
+      nested = d3.nest()
+               .key(function(d){ return d['Degree Type'];})
+               .key(function(d){return d['Year'];})
+               .key(function(d){ return d['Field'];})
+               .entries(data);
+	
+	    var ethn = d3.set();
+      data.forEach(function(d){
+          ethn.add(d['Ethnicity']);
+          return d;
+        });
+      color.domain(ethn.values());
+      var arc = d3.svg.arc()
+              .outerRadius(radius)
+              .innerRadius(radius - 30);
+      var pie = d3.layout.pie()
+              .sort(null)
+              .value(function(d){return d['Count'];});
+      var tip = d3.tip()
+                  .attr('class','d3-tip')
+                  .offset([0,0])
+                  .html(function(d){
+                    return d.data.Ethnicity + ":<span style='color:orangered'>" + d.data.Count + "</span>";
+                  })
+      
+      var legend = d3.select("body").append("svg")
+      .attr("class", "legend")
+      .attr("width", radius * 2)
+      .attr("height", radius * 2)
+      .selectAll("g")
+      .data(color.domain().slice().reverse())
+      .enter().append("g")
+      .attr("transform", function(d, i) {return "translate(0," + i * 40 + ")"; });
+
+      legend.append("rect")
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+      legend.append("text")
+      .attr("x", 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .text(function(d) { return d; });
+
+      years = [];
+      degrees = [];
+
+      nested.filter(function(d){
+
+        degrees.push(d.key);
+      })
+      var degree_data = nested[1];
+      degree_data.values.filter(function(d){
+      
+        years.push(new Date(d.key).getUTCFullYear());
+      });
+  
+    years_idx = 0;
+
+
+      function get_year_data(year){
+        var data = degree_data.values.filter(function(d){
+          return new Date(d.key).getUTCFullYear()=== year;
+        });
+
+        data[0].values.forEach(function(d){
+
+          ethn.add(d['Ethnicity']);
+          d.uid = d.key + "_" + new Date(d.values[0].Year).getUTCFullYear() + d.values[0]['Degree Type'];
+          d.degree = d.values[0]['Degree Type'];
+          return d;
+        });
+        return data;
+      };
+
+
+     function init_update_cs(year) {
+
+     var data = get_year_data(year);
+     d3.select('body').append('h2').text("Number of Graduates: " + data[0].values[0].degree + " " + year);
+    
+      var svg = d3.select("body").selectAll('.pie')
+                  .data(data[0].values,function(d){
+                    if(d.key === "Computer sciences" || d.key ==='Mathematics and statistics'
+                    || d.key === "Electrical engineering"){return d.uid;}}).enter()
+                  .append('svg')
+                  .attr('class','pie')
+                  .attr('width',radius * 2)
+                  .attr('height',radius * 2)
+                  .append('g')
+                  .attr('transform','translate(' + radius + "," + radius +")");
+
+        
+      svg.call(tip);
+      svg_1 = svg.selectAll('.arc')
+         .data(function(d){return pie(d.values);});
+
+  
+
+         svg_1.enter().append('path')
+         .attr('class','arc')
+         .transition()
+         .attr('d',arc)
+         .style('fill',function(d){return color(d.data.Ethnicity);})
+         .each(function(d){ this._current = d;});
+        
+        
+        svg.append("text")
+        .attr('class','Fields')
+        .attr("dy", ".35em")
+        .style('font-size','25px')
+        .text(function(d) {return d.key; });
+
+
+
+    };
+
+    function update_cs(year) {
+
+       var data = get_year_data(year);
+      function arcTween(obj){
+        var i = d3.interpolate(this._current,obj);
+        this._current = i(0);
+        return function(t){
+          return arc(i(t));
+        }
+
+
+      }
+      
+      
+      d3.select('h2').text("Number of Graduates: " +  data[0].values[0].degree + " " + year);
+    
+      var svg = d3.select("body").selectAll('.pie')
+                  .data(data[0].values,function(d){if(d.key === "Computer sciences" || d.key ==='Mathematics and statistics'
+                    || d.key === "Electrical engineering"){return d.uid;}});
+          
+      
+      svg.exit().remove();  
+          
+      svg = svg.enter()
+                  .append('svg')
+                  .attr('class','pie')
+                  .attr('width',radius * 2)
+                  .attr('height',radius * 2)
+                  .append('g')
+                  .attr('transform','translate(' + radius + "," + radius +")");
+
+        
+
+        var svg_1 = svg.selectAll('.arc')
+         .data(function(d){return pie(d.values);});
+
+  
+        
+         svg_1.enter().append('path')
+         .attr('class','arc')
+         .attr('d',arc)
+         .style('fill',function(d){return color(d.data.Ethnicity);})
+         .on('mouseover',tip.show)
+         .on('mouseout',tip.hide)
+         .each(function(d){ this._current = d;});
+        
+      
+        svg.append("text")
+        .attr('class',"Fields")
+        .attr("dy", ".35em")
+        .style('font-size','25px')
+        .text(function(d) {return d.key; });
+
+        svg_1.exit().remove();       
+        
+
+    };
+
+
+    function update(year) {
+
+	     var data = get_year_data(year);
+      function arcTween(obj){
+        var i = d3.interpolate(this._current,obj);
+        this._current = i(0);
+        return function(t){
+          return arc(i(t));
+        }
+
+
+      }
+      
+      
+      d3.select('h2').text("Number of Graduates: " +  data[0].values[0].degree + " " + year);
+    
+      var svg = d3.select("body").selectAll('.pie')
+                  .data(data[0].values,function(d){return d.uid;});
+				  
+      
+			svg.exit().remove();  
+				  
+			svg = svg.enter()
+                  .append('svg')
+                  .attr('class','pie')
+                  .attr('width',radius * 2)
+                  .attr('height',radius * 2)
+                  .append('g')
+                  .attr('transform','translate(' + radius + "," + radius +")");
+
+        
+
+        var svg_1 = svg.selectAll('.arc')
+         .data(function(d){return pie(d.values);});
+
+  
+        
+         svg_1.enter().append('path')
+         .attr('class','arc')
+         .attr('d',arc)
+         .style('fill',function(d){return color(d.data.Ethnicity);})
+         .on('mouseover',tip.show)
+         .on('mouseout',tip.hide)
+         .each(function(d){ this._current = d;});
+        
+      
+        svg.append("text")
+        .attr('class',"Fields")
+        .attr("dy", ".35em")
+        .style('font-size','25px')
+        .text(function(d) {return d.key; });
+
+        svg_1.exit().remove();       
+        
+
+    };
+
+    
+
+		
+      init_update_cs(years[years_idx]);
+		years_interval = setInterval(function(){
+						update_cs(years[years_idx]);
+						years_idx++;
+						if(years_idx >= years.length){
+							clearInterval(years_interval);
+              var year = 2012;
+              update(year);
+              var buttons = d3.select('body')
+                              .append('div')
+                              .attr('class',"year_buttons")
+                              .selectAll('div')
+                              .data(years)
+                              .enter().append('div')
+                              .text(function(d){return d;});
+              
+              var degree_buttons = d3.select('body')
+                                     .append('div')
+                                     .attr('class','degree_buttons')
+                                     .selectAll('div')
+                                     .data(degrees)
+                                     .enter().append('div')
+                                     .text(function(d){return d;});
+              d3.select('.year_buttons')
+                  .selectAll('div')
+                  .style('background',"#e41a1c")
+                  .style('color','white');
+
+              d3.select('.degree_buttons')
+                  .selectAll('div')
+                  .style('background',"#e41a1c")
+                  .style('color','white');
+
+              buttons.on("click",function(d){
+                year = d;
+                update(d);
+                d3.select('.year_buttons')
+                  .selectAll('div')
+                  .style('background',"#e41a1c")
+                  .style('color','white');
+
+                d3.select(this)
+                  .style('background',"#4daf4a")
+                  .style('color','white');
+
+                
+              });
+              degree_buttons.on('click',function(d){
+
+                if(d === "Associate"){
+                  degree_data = nested[0];
+                }
+                else if(d === "Bachelor"){
+                  degree_data = nested[1];
+                }
+                else{
+                  degree_data = nested[2];
+                }
+
+                update(year);
+                d3.select('.degree_buttons')
+                  .selectAll('div')
+                  .style('background',"#e41a1c")
+                  .style('color','white');
+
+                d3.select(this)
+                  .style('background',"#4daf4a")
+                  .style('color','white');
+              });
+              
+						}
+						},1500);
+      
+      
+    
+    
+    
+  };
+  
+ var format = d3.time.format("%Y");
+  d3.csv("degrees_awarded.csv",function(d){
+    d['Year'] = format.parse(d['Year']);
+    d['Count'] = +d['Count'];
+    return d;
+  }, draw); 
+
+  
+
+
+
+  </script>
+</body>

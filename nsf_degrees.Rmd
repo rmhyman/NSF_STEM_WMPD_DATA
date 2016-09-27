@@ -1,0 +1,161 @@
+---
+title: "Untitled"
+author: "Ransford Hyman Jr."
+date: "August 29, 2016"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(ggplot2)
+setwd("C:\\Users\\ransf\\Documents\\Udacity\\DataVisualization\\2015-wmpd-tables")
+df <- read.csv("degrees_awarded.csv")
+assoc_df <- subset(df, Degree.Type == 'Associate')
+ggplot(assoc_df,aes(x=Count)) +
+  geom_histogram(fill='blue',color='black',binwidth = 1000) +
+  scale_x_continuous(limits = c(0,586000))
+```
+
+Let's first get the dataframe for all graduates who were Black
+```{r}
+black_grads <- subset(df, Ethnicity == "Black")
+```
+
+```{r}
+ggplot(black_grads, aes(x=Count)) + geom_histogram(color='black',fill='blue')
+summary(black_grads$Count)
+```
+
+
+```{r}
+by(black_grads$Count,black_grads$Degree.Type,summary)
+```
+
+```{r}
+by(black_grads$Count,black_grads$Year,summary)
+```
+
+Let's zoom between 0 and 4600 since that should catch 75% of all of the data.
+
+```{r}
+ggplot(black_grads, aes(x=Count)) + geom_histogram(color='black',fill='blue',binwidth = 50) +
+  scale_x_continuous(limits = c(0,4600),breaks=seq(0,4600,250)) +
+  scale_y_continuous(breaks=seq(0,250,25))
+
+```
+
+Now lets look at only the relevant fields: Comp sci, math and engineering
+```{r}
+black_grads_rel <- subset(black_grads,Field %in% c('Computer sciences','Mathematics and statistics','Engineering','Engineering technologies'))
+```
+
+```{r}
+ggplot(black_grads_rel, aes(x=Count)) + geom_histogram(color='black',fill='blue',binwidth = 50)
+```
+
+```{r}
+summary(black_grads_rel$Count)
+```
+
+```{r}
+by(black_grads_rel$Count,black_grads_rel$Degree.Type,summary)
+```
+
+```{r}
+by(black_grads_rel$Count,black_grads_rel$Year,summary)
+```
+
+```{r}
+ggplot(black_grads_rel, aes(y=Count,x=factor(Year))) + geom_boxplot()
+```
+
+```{r}
+ggplot(black_grads_rel, aes(y=Count,x=factor(Degree.Type))) + geom_boxplot()
+```
+
+```{r}
+all_grads_rel <- subset(df,Field %in% c('Computer sciences','Mathematics and statistics','Engineering','Engineering technologies'))
+```
+
+```{r}
+ggplot(all_grads_rel, aes(x=factor(Degree.Type), y=Count)) + geom_boxplot() +
+  facet_wrap(~Ethnicity)
+```
+
+```{r}
+by(all_grads_rel$Count,all_grads_rel$Ethnicity,summary)
+```
+
+```{r}
+bs_ms_grads <- subset(all_grads_rel, Degree.Type %in% c("Bachelor","Masters"))
+```
+
+```{r}
+by(bs_ms_grads$Count,bs_ms_grads$Ethnicity,summary)
+```
+
+```{r}
+ggplot(bs_ms_grads, aes(x=factor(Degree.Type), y=Count)) + geom_boxplot() +
+  facet_wrap(~Ethnicity)
+```
+
+```{r}
+minority_bs_ms_grads <- subset(bs_ms_grads,!(Ethnicity %in% c("White","Amerian Indian")))
+ggplot(minority_bs_ms_grads, aes(x=factor(Degree.Type), y=Count)) + 
+  geom_boxplot() + facet_wrap(~Ethnicity)
+```
+
+```{r}
+ggplot(minority_bs_ms_grads, aes(x=factor(Field), y=Count)) + 
+  geom_boxplot() + facet_wrap(~Ethnicity)
+```
+
+```{r}
+white_bs_ms_grads <- subset(bs_ms_grads,Ethnicity == "White")
+
+ggplot(white_bs_ms_grads, aes(x=factor(Field), y=Count)) + 
+  geom_boxplot() + facet_wrap(~Ethnicity)
+```
+
+```{r}
+ggplot(minority_bs_ms_grads, aes(x=factor(Field), y=Count)) + 
+  geom_boxplot() + facet_wrap(~Year)
+```
+
+Now let's view some 2 and multi-dim plots
+
+```{r}
+ggplot(bs_ms_grads,aes(x=Year,y=Count)) + geom_jitter(aes(color=Ethnicity))
+```
+
+
+```{r}
+ggplot(bs_ms_grads,aes(x=Year,y=Count)) + geom_smooth(aes(color=Ethnicity))
+```
+
+```{r}
+ggplot(minority_bs_ms_grads,aes(x=Year,y=Count)) + geom_jitter(aes(shape=Degree.Type),color='blue') +
+  geom_smooth(aes(colour=Ethnicity),se=FALSE)
+```
+
+```{r}
+ggplot(minority_bs_ms_grads,aes(x=Year,y=Count)) + geom_jitter(aes(shape=Field),color='blue') +
+  geom_smooth(aes(colour=Ethnicity),se=FALSE)
+```
+
+```{r}
+ggplot(bs_ms_grads,aes(x=Year,y=Count)) + geom_jitter(aes(shape=Degree.Type),color='blue') +
+  geom_smooth(aes(colour=Ethnicity),se=FALSE) + 
+  scale_x_continuous(breaks=seq(2002,2012,1)) + facet_wrap(~Field)
+```
+
+
+```{r}
+ggplot(minority_bs_ms_grads,aes(x=Year,y=Count)) + geom_jitter(aes(shape=Degree.Type),color='blue') +
+  geom_smooth(aes(colour=Ethnicity),se=FALSE) +
+  scale_x_continuous(breaks=seq(2002,2012,1)) +facet_wrap(~Field)
+```
+
