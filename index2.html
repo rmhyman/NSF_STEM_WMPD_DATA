@@ -148,6 +148,10 @@ There have been many arguments as to why there is such low representation of min
                   .offset([0,-20])
                   .html(function(d){
                     var s = "";
+		/**
+		**** The code below accumlates all of the absolute graduation values to display for when the mouse is hovered
+		**** over a specific ethnicity.
+		***/
                     for(var i = 0; i < d.values.length; ++i){
                       if(i != d.values.length - 1){
                       s +=  new Date(d.values[i].Year).getUTCFullYear() + ":" + d.values[i].Count + ",\n";
@@ -223,7 +227,11 @@ There have been many arguments as to why there is such low representation of min
     
       
       
-
+  /******
+  ***** selected_data: data to draw in the stacked area chart
+  ***** upd: Flag to notify us whether this is an updated chart
+  ****** init: Flag to notify whether this chart is drawn as part of the initial animation
+  *****/
     function draw_chart(selected_data,upd,init){
 
       selected_data.forEach(function(d){
@@ -344,7 +352,10 @@ There have been many arguments as to why there is such low representation of min
                           .append('div')
                           .text(function(d){return d;});
 
-
+		/*****
+		***** The style attribute determines which color we should color the area of study.  
+		****** Associate degree only has 19 areas of studies
+		*****/
                 d3.select('.field_buttons')
                   .selectAll('div')
                   .style('background',function(d){ if(get_index(d) < 19) {return "#e41a1c";} return "#377eb8";})
