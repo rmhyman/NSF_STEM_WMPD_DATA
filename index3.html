@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Is the Pipeline Hindering Diversity and Inclusion Efforts in the Tech Industry?</title>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+    <style>
+        h2 {
+            position: absolute;
+            font-size: 20px;
+            top: 400px;
+            left: 240px;
+            margin: 0 auto;
+        }
+        
+        .bar-chart-header {
+            position: absolute;
+            font-size: 20px;
+            top: 380px;
+            left: 1200px;
+        }
+        
+        text.Fields {
+            text-anchor: middle;
+        }
+        
+        div.field_buttons {
+            position: right;
+            left: 50px;
+            right: 500px;
+            height: 100px;
+            width: 1500px;
+        }
+        
+        div.field_buttons div {
+            padding: 10px;
+            width: 50px;
+            height: 40px;
+            float: left;
+            border: 2px solid white;
+            font-size: 10px;
+        }
+        
+        div.deg_type_buttons {
+            float: left;
+            left: 150px;
+            right: 50px;
+        }
+        
+        div.deg_type_buttons div {
+            padding: 10px;
+            border: 2px solid white;
+            width: 50px;
+            height: 40px;
+            float: left;
+            font-size: 10px;
+        }
+        
+        .d3-tip {
+            color: white;
+            font-weight: bold;
+            background: black;
+            padding: 12px;
+            border-radius: 2px;
+            width: 100px;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 25px;
+            font-weight: bold;
+        }
+        
+        .content {
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .x-axis {
+            color: black;
+            stroke: 5px;
+        }
+        
+        svg.legend {
+            float: left;
+        }
+        
+        svg.bar-legend {
+            float: right;
+        }
+        
+        svg.area-chart {
+            float: left;
+        }
+        
+        svg.bar-chart {
+            float: right;
+        }
+    </style>
+
+</head>
+
+<body>
+    <p class="title">Is the Pipeline Hindering Diversity and Inclusion Efforts in the Tech Industry?</p>
+    <p class="content">Here is my stack area chart representation of the STEM field Graduation across various Ethnicities for the degrees who typically obtain Engineering positions at the major Silicon Valley Companies. Hover the mouse over the chart to get the absolute number of graduates from a particular ethnicity. The Degree Fields in <span style="color:#377eb8">blue</span> are not applicable to the Associate's Degrees. The raw data can be found on the <a href="https://www.nsf.gov/statistics/2015/nsf15311/start.cfm"> NSF Women Minority and Person with Disabilities</a> site. My Data Wrangling and Exploratory Data Analysis process can be found <a href="https://github.com/rmhyman/NSF_STEM_WMPD_DATA/">here</a>. The bar chart was generated using the <a href="https://github.com/rmhyman/openeeo">OpenEEO</a> repository that I created while doing this project. Although we can see average graduation rate of 11%, 6% and 7% for Black students with Bachelor Degrees in Computer Science, Mathematics and Electrical Engineering respectively, we only see an average of about 1% of Professionals are Black at some of the major Tech companies in the year 2014. Similarly for Hispanic students graduating with a Bachelor's Degree in Computer Science, Mathematics and Electrical Engineering, we see rates on average at 7%, 6% and 9% respectively yet an average of about 3% of Professionals are Hispanic at the tech companies shown. It is worthy to note that the data provided account for U.S. citizens only and the category of "Professionals" does not only represent Engineers, but the more detailed reports released by the companies yield similar findings.
+    </p>
+    <h1>Resources:</h1>
+    <ul><a href=" https://github.com/Caged/d3-tip">d3-tip</a></ul>
+    <ul><a href="https://bl.ocks.org/mbostock/3885211">Stacked Area Chart</a></ul>
+    <ul><a href="https://www.youtube.com/watch?v=5H7PSAqZ0Co">Stack Area Chart Video</a></ul>
+    <script type="text/javascript">
+        /*****
+                          This is the top level function that is called by the d3.tsv function call.  It is the entry point function for the d3 visulization for the stacked area_chart.
+                          *******/
+        function draw(data) {
+            var width = 600,
+                radius = 100,
+                height = 400,
+                marginLeft = 50,
+                marginRight = 50,
+                marginBottom = 80,
+                marginTop = 80;
+
+            width = width - marginRight - marginLeft;
+            height = height - (marginBottom * 2);
+
+
+            var color = d3.scale.ordinal()
+                .range(["#7fc97f", "#beaed4", "#fdc086", "#ffff99", "#386cb0", "#f0027f"]);
+
+
+
+            nested = d3.nest()
+                .key(function(d) {
+                    return d['Degree Type'];
+                })
+                .key(function(d) {
+                    return d['Field'];
+                })
+                .key(function(d) {
+                    return d['Ethnicity'];
+                })
+                .entries(data);
+
+            var ethn = d3.set();
+
+            data.forEach(function(d) {
+                ethn.add(d['Ethnicity']);
+
+            });
+
+
+
+            color.domain(ethn.values());
+
+            var legend = d3.select("body").append("svg")
+                .attr("class", "legend")
+                .attr("width", radius * 2)
+                .attr("height", radius * 2)
+                .selectAll("g")
+                .data(color.domain().slice().reverse())
+                .enter().append("g")
+                .attr("transform", function(d, i) {
+                    return "translate(0," + i * 25 + ")";
+                });
+
+            legend.append("rect")
+                .attr("width", 9)
+                .attr("height", 9)
+                .style("fill", color);
+
+            legend.append("text")
+                .attr("x", 12)
+                .attr("y", 5)
+                .attr("dy", ".35em")
+                .text(function(d) {
+                    return d;
+                });
+
+            var xs = d3.time.scale()
+                .range([0, width]);
+            var formatPercent = d3.format(".0%");
+            var ys = d3.scale.linear()
+                .range([height, 0]);
+
+            var xAxis = d3.svg.axis()
+                .scale(xs)
+                .orient('bottom');
+            var yAxis = d3.svg.axis()
+                .scale(ys)
+                .orient('left')
+                .tickFormat(formatPercent);
+
+            var tip = d3.tip()
+                .attr('class', 'd3-tip')
+                .offset([0, -20])
+                .html(function(d) {
+                    var s = "";
+                    /**
+                     **** The code below accumlates all of the absolute graduation values to display for when the mouse is hovered
+                     **** over a specific ethnicity.
+                     ***/
+                    for (var i = 0; i < d.values.length; ++i) {
+                        if (i != d.values.length - 1) {
+                            s += new Date(d.values[i].Year).getUTCFullYear() + ":" + d.values[i].Count * 100 + ",\n";
+                        } else {
+                            s += new Date(d.values[i].Year).getUTCFullYear() + ":" + d.values[i].Count * 100 + "\n";
+                        }
+                    }
+                    return d.key + ":\n <span style='color:orangered'>" + s + "</span>";
+                })
+
+
+            years = [];
+            degrees = [];
+            var degree_index = 1;
+
+
+            nested.filter(function(d) {
+
+                degrees.push(d.key);
+
+            })
+
+
+
+            var degree_data = nested[degree_index];
+
+            var deg_fields = [];
+
+
+            /*****
+            This function is used to populate an array of the degree fields that are assoicated with the current Degree Type(Associate, Bachelor, Masters).  Some degree fields are not applicable to the Associate's Degree so this is an helper function.
+            *****/
+            function update_degree_array() {
+
+                deg_fields = [];
+                degree_data.values.filter(function(d) {
+
+                    deg_fields.push(d.key);
+
+                });
+
+            }
+
+            update_degree_array();
+
+
+            /****
+            This function gets the proper index in the deg_fields array for the degree_name passed in (i.e Computer Sciences)
+            *****/
+            function get_index(degree_name) {
+
+                for (var i = 0; i < deg_fields.length; ++i) {
+                    if (deg_fields[i] == degree_name) {
+                        return i;
+                    }
+                }
+            };
+            var deg_name_idx = get_index("Mathematics and statistics");
+            var current_data = degree_data.values[deg_name_idx].values;
+
+
+
+            current_data[0].values.filter(function(d) {
+                years.push(new Date(d.Year));
+            });
+
+
+
+            xs.domain(d3.extent(years));
+            var stack = d3.layout.stack()
+                .y(function(d) {
+                    return d.Count;
+                })
+                .offset('zero')
+                .values(function(d) {
+                    return d.values;
+                });
+
+            var chart_group = d3.select('body').append('g')
+                .attr('class', "chart-group")
+            var svg = d3.select('.chart-group').append('svg')
+                .attr('class', 'area-chart')
+                .attr('width', width + marginRight + marginLeft)
+                .attr('height', height + (marginBottom * 2));
+
+            var g = svg.append('g')
+                .attr('transform', "translate(" + marginTop + "," + marginLeft + ")")
+                .attr('class', 'lines');
+
+
+
+
+            /******
+             ***** selected_data: data to draw in the stacked area chart
+             ***** upd: Flag to notify us whether this is an updated chart
+             ****** init: Flag to notify whether this chart is drawn as part of the initial animation
+             *****/
+            function draw_chart(selected_data, upd, init) {
+
+                selected_data.forEach(function(d) {
+
+                    d.uid = d.key + "_" + d.values[0].Field + d.values[0]['Degree Type'];
+                    d.degree = d.values[0]['Degree Type'];
+                    return d;
+                });
+
+
+                var totals = {
+                    "2002": 0,
+                    "2003": 0,
+                    "2004": 0,
+                    "2004": 0,
+                    "2005": 0,
+                    "2006": 0,
+                    "2007": 0,
+                    "2008": 0,
+                    "2009": 0,
+                    "2010": 0,
+                    "2011": 0,
+                    "2012": 0
+
+                };
+
+                //Calculate the totals graduation count for each year
+                selected_data.forEach(function(e) {
+                    e.values.forEach(function(d) {
+
+                        year = new Date(d['Year']).getUTCFullYear();
+
+                        totals[year] += d['Count'];
+                    });
+
+
+                });
+                selected_data.forEach(function(e) {
+                    e.values.forEach(function(d) {
+
+                        year = new Date(d['Year']).getUTCFullYear();
+
+                        d.Count = d.Count / totals[year];
+                        return d;
+                    });
+
+
+                });
+
+                var series = stack(selected_data);
+
+
+                ys.domain([0, d3.max(series, function(e) {
+                    return d3.max(e.values, function(d) {
+                        return d.y0 + d.y;
+                    });
+                })]);
+
+
+
+
+                if (upd == "yes") {
+                    d3.select('.chart-group').select('h2').text("Number of Graduates: " + degrees[degree_index] + " Degree-" + series[0].values[0].Field);
+                } else {
+                    d3.select('.chart-group').append('h2').text("Number of Graduates: " + degrees[degree_index] + "-" + series[0].values[0].Field);
+                }
+                var area = d3.svg.area()
+                    .x(function(d) {
+                        return xs(new Date(d.Year));
+                    })
+                    .y0(function(d) {
+                        return ys(d.y0);
+                    })
+                    .y1(function(d) {
+                        return ys(d.y0 + d.y);
+                    });
+
+                function update_color(key) {
+
+
+                    return color(key);
+                };
+
+
+
+                var tmp = g.selectAll('path').data(series, function(d) {
+                    return d.uid;
+                });
+
+                svg.call(tip);
+
+                tmp.enter().append('path')
+                    .attr('class', 'area_chart')
+                    .attr('fill', function(d) {
+                        return update_color(d.key);
+                    })
+                    .attr('d', function(d) {
+                        return area(d.values);
+                    })
+                    .on("mouseover", tip.show)
+                    .on("mouseout", tip.hide);
+
+                tmp.exit().remove();
+
+
+
+                if (upd == "yes") {
+                    g.selectAll('.x-axis').call(xAxis);
+                    g.selectAll('.y-axis').call(yAxis);
+
+                } else {
+                    g.append('g')
+                        .attr('class', 'x-axis')
+                        .attr('transform', 'translate(0,' + height + ")")
+                        .call(xAxis)
+                        .append("text")
+                        .attr('y', 45)
+                        .attr('x', 250)
+                        .style('font-size', '20px')
+                        .text('Year');
+
+                    g.append('g')
+                        .attr('class', 'y-axis')
+                        .call(yAxis)
+                        .append('text')
+                        .attr('x', -170)
+                        .attr('y', -60)
+                        .style('font-size', '20px')
+                        .attr('transform', 'rotate(-90)')
+                        .text('% of Graduates');
+                }
+
+
+            };
+
+
+            draw_chart(current_data, "no", "yes");
+
+            deg_name_idx = 0;
+            years_interval = setInterval(function() {
+                var init_fields = ['Computer sciences'];
+                var field_name = init_fields[0];
+                var idx = get_index(init_fields[deg_name_idx]);
+                current_data = degree_data.values[idx].values;
+                draw_chart(current_data, "yes", "yes");
+                deg_name_idx++;
+                if (deg_name_idx >= 1) {
+
+                    clearInterval(years_interval);
+
+                    var deg_type_menu = d3.select('body')
+                        .append('div')
+                        .attr('class', 'deg_type_buttons')
+                        .selectAll('div')
+                        .data(degrees);
+
+
+                    deg_type_menu.enter()
+                        .append('div')
+                        .text(function(d) {
+                            return d;
+                        });
+
+                    d3.select('.deg_type_buttons')
+                        .selectAll('div')
+                        .style('background', "#984ea3")
+                        .style('color', 'white');
+
+                    var idx = get_index(init_fields[0]);
+                    current_data = degree_data.values[idx].values;
+                    draw_chart(current_data, "yes", "no");
+
+                    var fm = d3.select('body')
+                        .append('div')
+                        .attr('class', 'field_buttons')
+                        .attr('transform', 'translate(700,50)');
+
+                    var field_menu = fm.selectAll('div')
+                        .data(deg_fields, function(d) {
+                            if (d == "Computer sciences" || d == "Mathematics and statistics" ||
+                                d == "Electrical engineering") {
+                                return d;
+                            }
+                        });
+
+                    /*****
+                     ***** This function carries out the coloring of the degree_field buttons based on which degree type was selected.  It basically is only needed for the switching back and forth from the Associate Degree.
+                     ******/
+                    function regen_field_buttons() {
+
+
+
+                        field_menu.enter()
+                            .append('div')
+                            .text(function(d) {
+                                return d;
+                            });
+
+                        /*****
+                         ***** The style attribute determines which color we should color the area of study.  
+                         ****** Associate degree only has 19 areas of studies
+                         *****/
+                        d3.select('.field_buttons')
+                            .selectAll('div')
+                            .style('background', function(d) {
+                                if (get_index(d) < 19) {
+                                    return "#e41a1c";
+                                }
+                                return "#377eb8";
+                            })
+                            .style('color', 'white');
+                    };
+
+                    regen_field_buttons();
+                    field_menu.on("click", function(d) {
+                        field_name = d;
+                        deg_name_idx = get_index(d);
+                        current_data = degree_data.values[deg_name_idx].values;
+                        draw_chart(current_data, "yes", "no");
+
+                        d3.select('.field_buttons')
+                            .selectAll('div')
+                            .style('background', function(d) {
+                                if (get_index(d) < 19) {
+                                    return "#e41a1c";
+                                }
+                                return "#377eb8";
+                            })
+                            .style('color', 'white');
+
+                        d3.select(this)
+                            .style('background', "#4daf4a")
+                            .style('color', 'white');
+
+
+                    });
+
+
+
+                    deg_type_menu.on('click', function(d) {
+
+                        if (d === "Associate") {
+                            degree_index = 0;
+
+                        } else if (d === "Bachelor") {
+                            degree_index = 1;
+                        } else {
+                            degree_index = 2;
+                        }
+                        degree_data = nested[degree_index];
+                        update_degree_array();
+
+                        field_menu = fm.selectAll('div')
+                            .data(deg_fields, function(d) {
+                                if (d == "Computer sciences" || d == "Mathematics and statistics" ||
+                                    d == "Electrical engineering") {
+                                    return d;
+                                }
+                            });
+                        regen_field_buttons();
+
+                        deg_name_idx = get_index("Computer sciences");
+                        current_data = degree_data.values[deg_name_idx].values;
+
+                        draw_chart(current_data, "yes", "no");
+
+
+                        d3.select('.deg_type_buttons')
+                            .selectAll('div')
+                            .style('background', "#984ea3")
+                            .style('color', 'white');
+
+                        d3.select(this)
+                            .style('background', "#4daf4a")
+                            .style('color', 'white');
+
+                    })
+
+                }
+            }, 3000);
+
+        };
+
+        /*****
+        This is the entry point function for drawing the stacked bar chart for the EEO data
+        Much of the code is similar to the draw function above.  Most of the differences is the changes needed to draw the bar chart.
+        ******/
+        function draw_eeo(data) {
+
+
+            var width = 450,
+                radius = 100,
+                height = 350,
+                marginLeft = 20,
+                marginRight = 20,
+                marginBottom = 50,
+                marginTop = 50;
+
+            width = width - marginRight - marginLeft;
+            height = height - (marginBottom * 2);
+
+
+            var color = d3.scale.category10();
+
+
+
+            nested_eeo = d3.nest()
+                .key(function(d) {
+                    return d['Category'];
+                })
+                .key(function(d) {
+                    return d['Year'];
+                })
+                .key(function(d) {
+                    return d['Company'];
+                })
+                .key(function(d) {
+                    return d['Ethnicity'];
+                })
+                .rollup(function(leaves) {
+                    return d3.sum(leaves, function(d) {
+                        return d.Count;
+                    });
+                })
+                .entries(data);
+
+            var ethn = d3.set();
+
+            data.forEach(function(d) {
+                ethn.add(d['Ethnicity']);
+
+            });
+
+
+
+            color.domain(ethn.values());
+
+            var legend = d3.select(".chart-group").append("svg")
+                .attr("class", "bar-legend")
+                .attr("width", radius * 2)
+                .attr("height", radius * 2)
+                .selectAll("g")
+                .data(color.domain().slice().reverse())
+                .enter().append("g")
+                .attr("transform", function(d, i) {
+                    return "translate(0," + i * 25 + ")";
+                });
+
+            legend.append("rect")
+                .attr("width", 9)
+                .attr("height", 9)
+                .style("fill", color);
+
+            legend.append("text")
+                .attr("x", 12)
+                .attr("y", 5)
+                .attr("dy", ".35em")
+                .text(function(d) {
+                    return d;
+                });
+
+            var xs = d3.scale.ordinal()
+                .rangeRoundBands([0, width], 0.35);
+            var formatPercent = d3.format(".0%");
+            var ys = d3.scale.linear()
+                .range([height, 0]);
+
+            var xAxis = d3.svg.axis()
+                .scale(xs)
+                .orient('bottom');
+            var yAxis = d3.svg.axis()
+                .scale(ys)
+                .orient('left')
+                .tickFormat(formatPercent);
+
+
+
+
+            var occupations = ["First/Mid Managers", "Professionals"];
+
+
+
+            nested_eeo = nested_eeo.filter(function(d) {
+
+                if (d.key == occupations[0] || d.key == occupations[1]) {
+                    return d;
+                }
+            })
+
+
+
+
+            var years = d3.set();
+            nested_eeo[0].values.forEach(function(d) {
+                years.add(new Date(d.key).getUTCFullYear());
+
+            });
+
+
+
+            var svg_g = d3.select('body').append('g')
+                .attr('class', 'svg-eeo-g');
+
+            var svg = d3.select('body').append('svg')
+                .attr('class', 'bar-chart')
+                .attr('width', width + marginRight + marginLeft)
+                .attr('height', height + (marginBottom * 2));
+
+            var g_ = svg.append('g')
+                .attr('transform', "translate(" + marginTop + "," + marginLeft + ")")
+                .attr('class', 'layers');
+
+
+            /******
+             ***** selected_data: data to draw in the stacked bar chart
+             *****/
+            function draw_chart(selected_data) {
+
+
+
+                current_data = selected_data;
+
+                current_data.values.forEach(function(d) {
+                    d.Total = d3.sum(d.values, function(c) {
+                        return c.values;
+                    });
+
+                });
+
+                layers = d3.layout.stack()(ethn.values().map(function(c, i) {
+                    return current_data.values.map(function(d) {
+                        return {
+                            x: d.key,
+                            y: d.values[i].values / d.Total
+                        };
+                    })
+                }));
+
+
+
+
+                function update_color(key) {
+
+
+                    return color(key);
+                };
+
+
+
+                var layer = g_.selectAll('.stack').data(layers, function(d, i) {
+                    return ethn.values()[i] + current_data.key;
+
+                });
+
+                xs.domain(layers[0].map(function(d) {
+                    return d.x;
+                }));
+
+                ys.domain([0, d3.max(layers[layers.length - 1], function(d) {
+                    return d.y0 + d.y;
+                })]);
+
+                d3.select('.svg-eeo-g').append('h2')
+                    .attr('class', 'bar-chart-header')
+                    .text("EEO-Report Data 2014");
+
+                layer.enter().append('g')
+                    .attr('class', 'stack')
+                    .attr('fill', function(d, i) {
+
+                        return update_color(ethn.values()[i]);
+                    });
+
+                layer.exit().remove();
+
+                var rects = layer.selectAll('rect')
+                    .data(function(d) {
+                        return d;
+                    });
+
+
+                rects.enter()
+                    .append('rect')
+                    .attr('x', function(d) {
+                        return xs(d.x);
+                    })
+                    .attr('y', function(d) {
+                        return ys(d.y0 + d.y);
+                    })
+                    .attr('height', function(d) {
+                        return ys(d.y0) - ys(d.y + d.y0);
+                    })
+                    .attr('width', xs.rangeBand());
+
+                rects.exit().remove();
+
+                g_.append('g')
+                    .attr('class', 'x-axis')
+                    .attr('transform', 'translate(0,' + height + ")")
+                    .call(xAxis)
+                    .append("text")
+                    .attr('y', 45)
+                    .attr('x', 150)
+                    .style('font-size', '20px')
+                    .text('Company');
+
+                g_.append('g')
+                    .attr('class', 'y-axis')
+                    .attr('transform', 'translate(20,0)')
+                    .call(yAxis)
+                    .append('text')
+                    .attr('transform', 'rotate(-90)')
+                    .attr('x', -200)
+                    .attr('y', -50)
+                    .style('font-size', '20px')
+                    .text('Professionals');
+
+
+
+            };
+
+
+            var idx = 1,
+                idx1 = 0;
+
+            draw_chart(nested_eeo[idx].values[idx1]);
+        };
+
+
+        /*****
+        Here we read the data and call the function for the stacked area chart
+        *****/
+        var format = d3.time.format("%Y");
+        d3.csv("degrees_awarded.csv", function(d) {
+            d['Year'] = format.parse(d['Year']);
+            d['Count'] = +d['Count'];
+            return d;
+        }, draw);
+
+        /*****
+        Here we read the data and call the function for the stacked bar chart
+        *****/
+        var format = d3.time.format("%Y");
+        d3.csv("eeo1-tech.csv", function(d) {
+            d['Year'] = format.parse(d['Year']);
+            d['Count'] = +d['Count'];
+            return d;
+        }, draw_eeo);
+    </script>
+</body>
