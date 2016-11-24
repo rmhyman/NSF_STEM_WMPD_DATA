@@ -9,52 +9,56 @@
     <style>
         h2 {
             position: absolute;
-            font-size: 20px;
-            top: 400px;
-            left: 240px;
+            font-size: 15px;
+            top: 310px;
+            left: 185px;
             margin: 0 auto;
         }
         
         .bar-chart-header {
             position: absolute;
-            font-size: 20px;
-            top: 380px;
-            left: 1200px;
+            font-size: 15px;
+            top: 205px;
+            left: 120px;
         }
-        
+
         text.Fields {
             text-anchor: middle;
         }
         
         div.field_buttons {
-            position: right;
-            left: 50px;
-            right: 500px;
-            height: 100px;
-            width: 1500px;
+            left: 279px;
+            right: 63px;
+            top:-202px;
+            float: left;
+            position: relative;
+            height: 63px;
+            width: auto;
         }
         
         div.field_buttons div {
-            padding: 10px;
-            width: 50px;
-            height: 40px;
             float: left;
+            padding: 7px;
+            width: 45px;
+            height: 25px;
             border: 2px solid white;
             font-size: 10px;
         }
         
         div.deg_type_buttons {
             float: left;
-            left: 150px;
-            right: 50px;
+            position: relative;
+            left: 25px;
+            right: 25px;
+            height: 25px;
         }
         
         div.deg_type_buttons div {
-            padding: 10px;
+            float:left;
+            padding: 5px;
             border: 2px solid white;
-            width: 50px;
-            height: 40px;
-            float: left;
+            width: 34px;
+            height: 15px;
             font-size: 10px;
         }
         
@@ -64,7 +68,8 @@
             background: black;
             padding: 12px;
             border-radius: 2px;
-            width: 100px;
+            width: 110px;
+            font-size: 10px;
         }
         
         .title {
@@ -82,46 +87,84 @@
             color: black;
             stroke: 5px;
         }
+        .readme {
+            display:block
+        }
         
         svg.legend {
             float: left;
+            width : 110px;
+            height: 140px;
+            font-size: 10px;
+    
         }
         
         svg.bar-legend {
             float: right;
+            height: 150px;
+            width: 150px;
+            font-size: 10px;
         }
         
         svg.area-chart {
-            float: left;
+            position: relative;
+            top:26px;
+            left: -130px;
+            right: 50px;
+            width:480px;
+            height:200px;
         }
         
         svg.bar-chart {
-            float: right;
+            float: left;
+            position: relative;
+            left:-59px;
+            bottom: 175px;
+        
+            
         }
+        .drawing {
+            height: 335px;
+            width : 980px;
+            
+
+        }
+        .s_chart_div {
+            float: left;
+            height: 30px;
+            width:800px;
+        }
+        .b_chart_div{
+            float:right;
+            position: relative;
+            left:160px;
+            width:500px;
+            height:240px;
+        }
+        
+
     </style>
 
 </head>
 
 <body>
     <p class="title">Is the Pipeline Hindering Diversity and Inclusion Efforts in the Tech Industry?</p>
-    <p class="content">Here is my stack area chart representation of the STEM field Graduation across various Ethnicities for the degrees who typically obtain Engineering positions at the major Silicon Valley Companies. Hover the mouse over the chart to get the absolute number of graduates from a particular ethnicity. The Degree Fields in <span style="color:#377eb8">blue</span> are not applicable to the Associate's Degrees. The raw data can be found on the <a href="https://www.nsf.gov/statistics/2015/nsf15311/start.cfm"> NSF Women Minority and Person with Disabilities</a> site. My Data Wrangling and Exploratory Data Analysis process can be found <a href="https://github.com/rmhyman/NSF_STEM_WMPD_DATA/">here</a>. The bar chart was generated using the <a href="https://github.com/rmhyman/openeeo">OpenEEO</a> repository that I created while doing this project. Although we can see average graduation rate of 11%, 6% and 7% for Black students with Bachelor Degrees in Computer Science, Mathematics and Electrical Engineering respectively, we only see an average of about 1% of Professionals are Black at some of the major Tech companies in the year 2014. Similarly for Hispanic students graduating with a Bachelor's Degree in Computer Science, Mathematics and Electrical Engineering, we see rates on average at 7%, 6% and 9% respectively yet an average of about 3% of Professionals are Hispanic at the tech companies shown. It is worthy to note that the data provided account for U.S. citizens only and the category of "Professionals" does not only represent Engineers, but the more detailed reports released by the companies yield similar findings.
-    </p>
-    <h1>Resources:</h1>
-    <ul><a href=" https://github.com/Caged/d3-tip">d3-tip</a></ul>
-    <ul><a href="https://bl.ocks.org/mbostock/3885211">Stacked Area Chart</a></ul>
-    <ul><a href="https://www.youtube.com/watch?v=5H7PSAqZ0Co">Stack Area Chart Video</a></ul>
+    
     <script type="text/javascript">
+    var outer_div = d3.select('body')
+                      .append('div')
+                      .attr('class','drawing');
         /*****
                           This is the top level function that is called by the d3.tsv function call.  It is the entry point function for the d3 visulization for the stacked area_chart.
                           *******/
         function draw(data) {
-            var width = 600,
-                radius = 100,
-                height = 400,
-                marginLeft = 50,
-                marginRight = 50,
-                marginBottom = 80,
-                marginTop = 80;
+            var width = 448,
+                radius = 15,
+                height = 200,
+                marginLeft = 30,
+                marginRight = 20,
+                marginBottom = 40,
+                marginTop = 60;
 
             width = width - marginRight - marginLeft;
             height = height - (marginBottom * 2);
@@ -155,10 +198,14 @@
 
             color.domain(ethn.values());
 
-            var legend = d3.select("body").append("svg")
+
+            var s_chart_div = d3.select(".drawing").append("div")
+                                .attr('class','s_chart_div');
+
+            var legend = s_chart_div.append("svg")
                 .attr("class", "legend")
-                .attr("width", radius * 2)
-                .attr("height", radius * 2)
+                .attr("width", radius * 7)
+                .attr("height", radius * 6)
                 .selectAll("g")
                 .data(color.domain().slice().reverse())
                 .enter().append("g")
@@ -280,9 +327,9 @@
                     return d.values;
                 });
 
-            var chart_group = d3.select('body').append('g')
-                .attr('class', "chart-group")
-            var svg = d3.select('.chart-group').append('svg')
+           // var chart_group = s_chart_div.append('g')
+             //   .attr('class', "chart-group")
+            var svg = s_chart_div.append('svg')
                 .attr('class', 'area-chart')
                 .attr('width', width + marginRight + marginLeft)
                 .attr('height', height + (marginBottom * 2));
@@ -361,9 +408,9 @@
 
 
                 if (upd == "yes") {
-                    d3.select('.chart-group').select('h2').text("Number of Graduates: " + degrees[degree_index] + " Degree-" + series[0].values[0].Field);
+                    d3.select('.s_chart_div').select('h2').text("Number of Graduates: " + degrees[degree_index] + " Degree-" + series[0].values[0].Field);
                 } else {
-                    d3.select('.chart-group').append('h2').text("Number of Graduates: " + degrees[degree_index] + "-" + series[0].values[0].Field);
+                    d3.select('.s_chart_div').append('h2').text("Number of Graduates: " + degrees[degree_index] + "-" + series[0].values[0].Field);
                 }
                 var area = d3.svg.area()
                     .x(function(d) {
@@ -417,16 +464,16 @@
                         .append("text")
                         .attr('y', 45)
                         .attr('x', 250)
-                        .style('font-size', '20px')
+                        .style('font-size', '15px')
                         .text('Year');
 
                     g.append('g')
                         .attr('class', 'y-axis')
                         .call(yAxis)
                         .append('text')
-                        .attr('x', -170)
-                        .attr('y', -60)
-                        .style('font-size', '20px')
+                        .attr('x', -110)
+                        .attr('y', -45)
+                        .style('font-size', '15px')
                         .attr('transform', 'rotate(-90)')
                         .text('% of Graduates');
                 }
@@ -449,10 +496,9 @@
 
                     clearInterval(years_interval);
 
-                    var deg_type_menu = d3.select('body')
-                        .append('div')
+                    var deg_type_menu = s_chart_div.append('div')
                         .attr('class', 'deg_type_buttons')
-                        .selectAll('div')
+                        .selectAll('.deg_type_buttons')
                         .data(degrees);
 
 
@@ -471,8 +517,7 @@
                     current_data = degree_data.values[idx].values;
                     draw_chart(current_data, "yes", "no");
 
-                    var fm = d3.select('body')
-                        .append('div')
+                    var fm = s_chart_div.append('div')
                         .attr('class', 'field_buttons')
                         .attr('transform', 'translate(700,50)');
 
@@ -589,9 +634,9 @@
         function draw_eeo(data) {
 
 
-            var width = 450,
-                radius = 100,
-                height = 350,
+            var width = 400,
+                radius = 50,
+                height = 250,
                 marginLeft = 20,
                 marginRight = 20,
                 marginBottom = 50,
@@ -636,7 +681,9 @@
 
             color.domain(ethn.values());
 
-            var legend = d3.select(".chart-group").append("svg")
+            var b_chart_div = d3.select('.drawing').append("div")
+                                .attr('class','b_chart_div');
+            var legend = b_chart_div.append("svg")
                 .attr("class", "bar-legend")
                 .attr("width", radius * 2)
                 .attr("height", radius * 2)
@@ -699,10 +746,9 @@
 
 
 
-            var svg_g = d3.select('body').append('g')
-                .attr('class', 'svg-eeo-g');
+            
 
-            var svg = d3.select('body').append('svg')
+            var svg = b_chart_div.append('svg')
                 .attr('class', 'bar-chart')
                 .attr('width', width + marginRight + marginLeft)
                 .attr('height', height + (marginBottom * 2));
@@ -761,7 +807,7 @@
                     return d.y0 + d.y;
                 })]);
 
-                d3.select('.svg-eeo-g').append('h2')
+                b_chart_div.append('h2')
                     .attr('class', 'bar-chart-header')
                     .text("EEO-Report Data 2014");
 
@@ -811,9 +857,9 @@
                     .call(yAxis)
                     .append('text')
                     .attr('transform', 'rotate(-90)')
-                    .attr('x', -200)
+                    .attr('x', -100)
                     .attr('y', -50)
-                    .style('font-size', '20px')
+                    .style('font-size', '15px')
                     .text('Professionals');
 
 
@@ -848,4 +894,12 @@
             return d;
         }, draw_eeo);
     </script>
+    <div class="readme">
+    <p class="content">Here is my stack area chart representation of the STEM field Graduation across various Ethnicities for the degrees who typically obtain Engineering positions at the major Silicon Valley Companies. Hover the mouse over the chart to get the absolute number of graduates from a particular ethnicity. The Degree Fields in <span style="color:#377eb8">blue</span> are not applicable to the Associate's Degrees. The raw data can be found on the <a href="https://www.nsf.gov/statistics/2015/nsf15311/start.cfm"> NSF Women Minority and Person with Disabilities</a> site. My Data Wrangling and Exploratory Data Analysis process can be found <a href="https://github.com/rmhyman/NSF_STEM_WMPD_DATA/">here</a>. The bar chart was generated using the <a href="https://github.com/rmhyman/openeeo">OpenEEO</a> repository that I created while doing this project. Although we can see average graduation rate of 11%, 6% and 7% for Black students with Bachelor Degrees in Computer Science, Mathematics and Electrical Engineering respectively, we only see an average of about 1% of Professionals are Black at some of the major Tech companies in the year 2014. Similarly for Hispanic students graduating with a Bachelor's Degree in Computer Science, Mathematics and Electrical Engineering, we see rates on average at 7%, 6% and 9% respectively yet an average of about 3% of Professionals are Hispanic at the tech companies shown. It is worthy to note that the data provided account for U.S. citizens only and the category of "Professionals" does not only represent Engineers, but the more detailed reports released by the companies yield similar findings.
+    </p>
+    <h1>Resources:</h1>
+    <ul><a href=" https://github.com/Caged/d3-tip">d3-tip</a></ul>
+    <ul><a href="https://bl.ocks.org/mbostock/3885211">Stacked Area Chart</a></ul>
+    <ul><a href="https://www.youtube.com/watch?v=5H7PSAqZ0Co">Stack Area Chart Video</a></ul>
+    </div>
 </body>
