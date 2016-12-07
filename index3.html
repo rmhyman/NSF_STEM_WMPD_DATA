@@ -5,21 +5,19 @@
     <title>Is the Pipeline Hindering Diversity and Inclusion Efforts in the Tech Industry?</title>
     <meta charset="utf-8">
     <script src="http://d3js.org/d3.v3.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
     <style>
         h2 {
-            position: absolute;
             font-size: 15px;
-            top: 240px;
-            left: 185px;
-            margin: 0 auto;
+            font-weight: bold;
+            text-align: center;
+            
         }
         
         .bar-chart-header {
-            position: absolute;
             font-size: 15px;
-            top: 205px;
-            left: 120px;
+            
         }
 
         text.Fields {
@@ -27,18 +25,10 @@
         }
         
         div.field_buttons {
-            left: 279px;
-            right: 63px;
-            top:-202px;
-            float: left;
-            position: relative;
-            height: 63px;
-            width: auto;
+           
         }
         
         div.field_buttons div {
-            float: left;
-            padding: 7px;
             width: 45px;
             height: 25px;
             border: 2px solid white;
@@ -46,16 +36,10 @@
         }
         
         div.deg_type_buttons {
-            float: left;
-            position: relative;
-            left: 25px;
-            right: 25px;
             height: 25px;
         }
         
         div.deg_type_buttons div {
-            float:left;
-            padding: 5px;
             border: 2px solid white;
             width: 34px;
             height: 15px;
@@ -87,11 +71,6 @@
             color: black;
             stroke: 5px;
         }
-        .readme {
-            display:block
-            position:relative;
-            padding-top: 140px;
-        }
         
         svg.legend {
             float: left;
@@ -108,46 +87,19 @@
             font-size: 10px;
         }
         
-        svg.area-chart {
-            position: relative;
-            top:26px;
-            left: -130px;
-            right: 50px;
-            width:480px;
-            height:200px;
-        }
+
         
         svg.bar-chart {
-            float: left;
-            position: relative;
-            left:-59px;
-            bottom: 175px;
+           
         
             
         }
-        .drawing {
-            height: 335px;
-            width : 980px;
-            position: relative;
-            top:100px;
-            
-
-        }
+        
         .s_chart_div {
-            float: left;
-            position: relative;
-            height: 247px;
-            width:745px;
-            top:-330px;
+        
         }
         .b_chart_div{
-            float:right;
-            position: relative;
-            left:160px;
-            width:500px;
-            height:240px;
-            top:-23px;
-            bottom: 250px;
+            
         }
         
 
@@ -156,22 +108,52 @@
 </head>
 
 <body>
-    <p class="title">Is the Pipeline Hindering Diversity and Inclusion Efforts in the Tech Industry?</p>
+<div class="container">
+<div class="row">
+        <div class="col-md-12">
+            <div class="readme">
+            <p class="title">Is the Pipeline Hindering Diversity and Inclusion Efforts in the Tech Industry?</p>
+    <p class="content">Here is my stack area chart representation of the STEM field Graduation across various Ethnicities for the degrees who typically obtain Engineering positions at the major Silicon Valley Companies. Hover the mouse over the chart to get the absolute number of graduates from a particular ethnicity. The Degree Fields in <span style="color:#377eb8">blue</span> are not applicable to the Associate's Degrees. The raw data can be found on the <a href="https://www.nsf.gov/statistics/2015/nsf15311/start.cfm"> NSF Women Minority and Person with Disabilities</a> site. My Data Wrangling and Exploratory Data Analysis process can be found <a href="https://github.com/rmhyman/NSF_STEM_WMPD_DATA/">here</a>. The bar chart was generated using the <a href="https://github.com/rmhyman/openeeo">OpenEEO</a> repository that I created while doing this project. Although we can see average graduation rate of 11%, 6% and 7% for Black students with Bachelor Degrees in Computer Science, Mathematics and Electrical Engineering respectively, we only see an average of about 1% of Professionals are Black at some of the major Tech companies in the year 2014. Similarly for Hispanic students graduating with a Bachelor's Degree in Computer Science, Mathematics and Electrical Engineering, we see rates on average at 7%, 6% and 9% respectively yet an average of about 3% of Professionals are Hispanic at the tech companies shown. It is worthy to note that the data provided account for U.S. citizens only and the category of "Professionals" does not only represent Engineers, but the more detailed reports released by the companies yield similar findings.
+    </p>
     
+    </div>
+        </div>      
+    </div>
+
+    <div class="row">
+              <div class="col-md-6">
+                  <div id = "first_vis"></div>
+              </div>
+              <div class="col-md-6">
+                  <div id = "second_vis"></div>
+              </div>
+        </div>
+
+    <div class="row">
+            <div class="col-md-6">
+            <h1>Resources:</h1>
+    <ul><a href=" https://github.com/Caged/d3-tip">d3-tip</a></ul>
+    <ul><a href="https://bl.ocks.org/mbostock/3885211">Stacked Area Chart</a></ul>
+    <ul><a href="https://www.youtube.com/watch?v=5H7PSAqZ0Co">Stack Area Chart Video</a></ul>
+            </div>
+
+            </div>
+    
+    </div>
     <script type="text/javascript">
-    var outer_div = d3.select('body')
-                      .append('div')
-                      .attr('class','drawing');
+    //var outer_div = d3.select('body')
+      //                .append('div')
+        //              .attr('class','drawing');
         /*****
                           This is the top level function that is called by the d3.tsv function call.  It is the entry point function for the d3 visulization for the stacked area_chart.
                           *******/
         function draw(data) {
-            var width = 448,
+            var width = 440,
                 radius = 15,
-                height = 200,
-                marginLeft = 30,
-                marginRight = 20,
-                marginBottom = 40,
+                height = 250,
+                marginLeft = 40,
+                marginRight = 40,
+                marginBottom = 60,
                 marginTop = 60;
 
             width = width - marginRight - marginLeft;
@@ -207,7 +189,7 @@
             color.domain(ethn.values());
 
 
-            var s_chart_div = d3.select(".drawing").append("div")
+            var s_chart_div = d3.select("#first_vis").append("div")
                                 .attr('class','s_chart_div');
 
             var legend = s_chart_div.append("svg")
@@ -511,13 +493,14 @@
 
 
                     deg_type_menu.enter()
-                        .append('div')
+                        .append('button')
+                        .attr('class', 'btn btn-primary btn-sm')
                         .text(function(d) {
                             return d;
                         });
 
                     d3.select('.deg_type_buttons')
-                        .selectAll('div')
+                        .selectAll('button')
                         .style('background', "#984ea3")
                         .style('color', 'white');
 
@@ -545,7 +528,8 @@
 
 
                         field_menu.enter()
-                            .append('div')
+                            .append('button')
+                            .attr('class', 'btn btn-primary btn-sm')
                             .text(function(d) {
                                 return d;
                             });
@@ -555,7 +539,7 @@
                          ****** Associate degree only has 19 areas of studies
                          *****/
                         d3.select('.field_buttons')
-                            .selectAll('div')
+                            .selectAll('button')
                             .style('background', function(d) {
                                 if (get_index(d) < 19) {
                                     return "#e41a1c";
@@ -573,7 +557,7 @@
                         draw_chart(current_data, "yes", "no");
 
                         d3.select('.field_buttons')
-                            .selectAll('div')
+                            .selectAll('button')
                             .style('background', function(d) {
                                 if (get_index(d) < 19) {
                                     return "#e41a1c";
@@ -604,7 +588,7 @@
                         degree_data = nested[degree_index];
                         update_degree_array();
 
-                        field_menu = fm.selectAll('div')
+                        field_menu = fm.selectAll('button')
                             .data(deg_fields, function(d) {
                                 if (d == "Computer sciences" || d == "Mathematics and statistics" ||
                                     d == "Electrical engineering") {
@@ -620,7 +604,7 @@
 
 
                         d3.select('.deg_type_buttons')
-                            .selectAll('div')
+                            .selectAll('button')
                             .style('background', "#984ea3")
                             .style('color', 'white');
 
@@ -689,7 +673,7 @@
 
             color.domain(ethn.values());
 
-            var b_chart_div = d3.select('.drawing').append("div")
+            var b_chart_div = d3.select('#second_vis').append("div")
                                 .attr('class','b_chart_div');
             var legend = b_chart_div.append("svg")
                 .attr("class", "bar-legend")
@@ -856,7 +840,7 @@
                     .append("text")
                     .attr('y', 45)
                     .attr('x', 150)
-                    .style('font-size', '20px')
+                    .style('font-size', '15px')
                     .text('Company');
 
                 g_.append('g')
@@ -902,12 +886,5 @@
             return d;
         }, draw_eeo);
     </script>
-    <div class="readme">
-    <p class="content">Here is my stack area chart representation of the STEM field Graduation across various Ethnicities for the degrees who typically obtain Engineering positions at the major Silicon Valley Companies. Hover the mouse over the chart to get the absolute number of graduates from a particular ethnicity. The Degree Fields in <span style="color:#377eb8">blue</span> are not applicable to the Associate's Degrees. The raw data can be found on the <a href="https://www.nsf.gov/statistics/2015/nsf15311/start.cfm"> NSF Women Minority and Person with Disabilities</a> site. My Data Wrangling and Exploratory Data Analysis process can be found <a href="https://github.com/rmhyman/NSF_STEM_WMPD_DATA/">here</a>. The bar chart was generated using the <a href="https://github.com/rmhyman/openeeo">OpenEEO</a> repository that I created while doing this project. Although we can see average graduation rate of 11%, 6% and 7% for Black students with Bachelor Degrees in Computer Science, Mathematics and Electrical Engineering respectively, we only see an average of about 1% of Professionals are Black at some of the major Tech companies in the year 2014. Similarly for Hispanic students graduating with a Bachelor's Degree in Computer Science, Mathematics and Electrical Engineering, we see rates on average at 7%, 6% and 9% respectively yet an average of about 3% of Professionals are Hispanic at the tech companies shown. It is worthy to note that the data provided account for U.S. citizens only and the category of "Professionals" does not only represent Engineers, but the more detailed reports released by the companies yield similar findings.
-    </p>
-    <h1>Resources:</h1>
-    <ul><a href=" https://github.com/Caged/d3-tip">d3-tip</a></ul>
-    <ul><a href="https://bl.ocks.org/mbostock/3885211">Stacked Area Chart</a></ul>
-    <ul><a href="https://www.youtube.com/watch?v=5H7PSAqZ0Co">Stack Area Chart Video</a></ul>
-    </div>
+    
 </body>
